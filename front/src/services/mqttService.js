@@ -1,8 +1,7 @@
 import mqtt from 'mqtt';
+import { API_BASE_URL, MQTT_BROKER_URL } from '../config';
 
-const MQTT_BROKER_URL = 'ws://192.168.0.158:9001'; // MQTT 브로커 주소 (예시: WebSocket 포트 사용)
 const TOPIC = 'sensor/temperature'; // 예시 topic
-
 let client;
 
 export const connectMQTT = (onMessageCallback) => {
@@ -47,7 +46,8 @@ const getUnitForType = (type) => {
 
 // POST 요청 함수 추가
 const postSensorDataToBackend = (type, value) => {
-    fetch('http://localhost:8080/api/sensor', {
+    fetch(`${API_BASE_URL}/api/sensor`, {
+    /* fetch('http://localhost:8080/api/sensor', { */
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

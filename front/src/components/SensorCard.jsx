@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 
 const SensorCard = ({ type, label }) => {
     const [value, setValue] = useState(null);
@@ -6,14 +7,23 @@ const SensorCard = ({ type, label }) => {
     const [time, setTime] = useState('');
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/sensor/latest/${type}`)
-            .then(res => res.json())
+        console.log(`[SensorCard] 요청: ${API_BASE_URL}/api/sensor/latest/${type}`);
+        fetch(`${API_BASE_URL}/api/sensor/latest/${type}`)
+            .then(res => {
+                console.log('[SensorCard] 응답 상태:', res.status);
+                return res.json();
+            })
             .then(json => {
+                console.log('[SensorCard] 데이터:', type, json);
                 setValue(json.value);
                 setUnit(json.unit);
-                setTime(json.timestamp?.substring(11, 16)); // "HH:mm"
+                setTime(json.timestamp?.substring(11, 16));
             })
-            .catch(err => console.error(`${label} 센서 데이터 로딩 실패:`, err));
+            .catch(err => {
+                console.error(`${label} 센서 데이터 로딩 실패:`, err);
+                // 필요 시 임시 표시값
+                // setValue(0); setUnit('');
+            });
     }, [type]);
 
     return (

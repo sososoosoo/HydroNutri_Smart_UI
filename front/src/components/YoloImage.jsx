@@ -10,13 +10,14 @@ def yolo_result():
  */
 
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 
 const YoloImage = ({ refreshInterval = 5000 }) => {
     const [imgSrc, setImgSrc] = useState('');
 
     const updateImage = () => {
         const timestamp = new Date().getTime();
-        setImgSrc(`http://192.168.0.158:5000/yolo/result?t=${timestamp}`);
+        setImgSrc(`${API_BASE_URL}/yolo/result?t=${timestamp}`);
     };
 
     useEffect(() => {

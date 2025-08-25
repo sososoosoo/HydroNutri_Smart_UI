@@ -1,26 +1,8 @@
-// 백엔드 응답 예시
-/*{
-  "image": "data:image/jpeg;base64,...",
-  "boxes": [
-    {
-      "x": 80, "y": 60, "width": 100, "height": 40,
-      "label": "Fish",
-      "length_cm": 21.3,
-      "weight_g": 182
-    },
-    {
-      "x": 220, "y": 90, "width": 120, "height": 45,
-      "label": "Fish",
-      "length_cm": 24.1,
-      "weight_g": 210
-    }
-  ]
-}
- */
-
+import { API_BASE_URL } from '../config';
 import React, { useEffect, useState } from 'react';
 
-const FishOverlayImage = ({ apiUrl = 'http://192.168.0.158:5000/yolo/fish', refreshInterval = 3000 }) => {
+
+const FishOverlayImage = ({ apiUrl = `${API_BASE_URL}/yolo/fish`, refreshInterval = 3000 }) => {
     const [imageSrc, setImageSrc] = useState('');
     const [boxes, setBoxes] = useState([]);
 

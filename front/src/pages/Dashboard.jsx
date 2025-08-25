@@ -8,6 +8,9 @@ import AlertPopup from '../components/AlertPopup';
 import YoloOverlayImage from '../components/YoloOverlayImage';
 import FishOverlayImage from '../components/FishOverlayImage';
 import SmartAlertOverlay from '../components/SmartAlertOverlay';
+import { sendAlertEmail } from '../services/alertService'
+import { API_BASE_URL } from '../config';
+import SensorChartWithTable from '../components/SensorChartWithTable';
 
 const Dashboard = () => {
     const [temperature, setTemperature] = useState(0);
@@ -20,9 +23,13 @@ const Dashboard = () => {
         const fetchSensorThresholds = async () => {
             try {
                 const [hRes, pRes, dRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/api/sensor/latest/humidity`),
+                    fetch(`${API_BASE_URL}/api/sensor/latest/ph`),
+                    fetch(`${API_BASE_URL}/api/sensor/latest/do`)
+                    /*
                     fetch('http://localhost:8080/api/sensor/latest/humidity'),
                     fetch('http://localhost:8080/api/sensor/latest/ph'),
-                    fetch('http://localhost:8080/api/sensor/latest/do')
+                    fetch('http://localhost:8080/api/sensor/latest/do') */
                 ]);
 
                 const h = await hRes.json();
@@ -62,17 +69,26 @@ const Dashboard = () => {
 
             postSensorDataToBackend('temperature', temp);
 
+            if (temp > 30) {
+                setAlertMessage('⚠ 온도가 너무 높습니다!');
+                sendAlertEmail('온도 경고', `현재 온도는 ${temp}°C로 너무 높습니다.`);
+            }
+
+            if (humidity > 70) {
+                setAlertMessage('⚠ 습도가 너무 높습니다!');
+                sendAlertEmail('습도 경고', `현재 습도는 ${humidity}%로 너무 높습니다.`);
+            }
+
             if (ph < 6.0) {
                 setAlertMessage('⚠ pH 수치가 너무 낮습니다!');
-            } else if (doValue < 3.0) {
-                setAlertMessage('⚠ DO 수치가 너무 낮습니다!');
-            } else if (temperature > 30.0) {
-                setAlertMessage('⚠ 온도가 너무 높습니다!');
-            } else if (humidity > 80.0) {
-                setAlertMessage('⚠ 습도가 너무 높습니다!');
-            } else {
-                setAlertMessage('');
+                sendAlertEmail('pH 수치 경고', `현재 pH 수치가 ${ph}로 너무 낮습니다.`);
             }
+
+            if (doValue < 3.0) {
+                setAlertMessage('⚠ DO 수치가 너무 낮습니다!');
+                sendAlertEmail('DO 수치 경고', `현재 DO 수치가 ${doValue} mg/L로 너무 낮습니다.`);
+            }
+
         });
 
         return () => disconnectMQTT();
@@ -93,10 +109,10 @@ const Dashboard = () => {
                 <SensorCard type="ph" label="pH" />
                 <SensorCard type="do" label="DO" />
             </div>
-            <SensorChart title="온도" api="temperature" unit="°C" />
-            <SensorChart title="습도" api="humidity" unit="%" />
-            <SensorChart title="pH" api="ph" unit="" />
-            <SensorChart title="DO" api="do" unit="mg/L" />
+            <SensorChartWithTable title="온도" api="temperature" unit="°C" />
+            <SensorChartWithTable title="습도" api="humidity" unit="%" />
+            <SensorChartWithTable title="pH" api="ph" unit="" />
+            <SensorChartWithTable title="DO" api="do" unit="mg/L" />
 
             <YoloImage refreshInterval={3000} />
 

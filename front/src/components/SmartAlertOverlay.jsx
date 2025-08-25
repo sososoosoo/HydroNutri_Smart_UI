@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE_URL } from '../config';
 
-const SmartAlertOverlay = ({ apiUrl = 'http://192.168.0.158:5000/yolo/analysis', refreshInterval = 5000 }) => {
+const SmartAlertOverlay = ({ apiUrl = `${API_BASE_URL}/yolo/analysis`, refreshInterval = 5000 }) => {
     const [alertMessage, setAlertMessage] = useState('');
 
     useEffect(() => {

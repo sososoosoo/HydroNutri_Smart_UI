@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { API_BASE_URL } from '../config';
 
 const SensorChart = ({ title, api, unit }) => {
     const [data, setData] = useState([]);
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/sensor/${api}`)
+        fetch(`${API_BASE_URL}/api/sensor/${api}`)
+        /* fetch(`http://localhost:8080/api/sensor/${api}`) */
             .then(res => res.json())
             .then(json => {
                 console.log(`${title} 불러온 데이터:`, json);

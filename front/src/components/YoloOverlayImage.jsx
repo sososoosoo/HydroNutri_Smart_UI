@@ -1,17 +1,7 @@
-// 백엔드 응답 예시
-/*{
-  "image": "data:image/jpeg;base64,...",
-  "boxes": [
-    { "x": 100, "y": 50, "width": 120, "height": 180, "label": "Tomato" },
-    { "x": 300, "y": 80, "width": 90,  "height": 120, "label": "Cucumber" }
-  ]
-}
-
- */
-
 import React, { useEffect, useState } from 'react';
+import { YOLO_API_URL } from '../config';
 
-const YoloOverlayImage = ({ apiUrl = 'http://192.168.0.158:5000/yolo/data', refreshInterval = 3000 }) => {
+const YoloOverlayImage = ({ apiUrl = `${YOLO_API_URL}/yolo/data`, refreshInterval = 3000 }) => {
     const [imageSrc, setImageSrc] = useState('');
     const [boxes, setBoxes] = useState([]);
 
