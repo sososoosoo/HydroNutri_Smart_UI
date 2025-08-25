@@ -4,8 +4,10 @@ import com.hydronutri.smartfarm_backend.entity.SensorData;
 import com.hydronutri.smartfarm_backend.repository.SensorDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.hydronutri.smartfarm_backend.dto.SensorDataRequest;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,17 +19,20 @@ public class SensorDataController {
     @Autowired
     private SensorDataRepository sensorDataRepository;
 
+    // 센서 데이터 저장
     @PostMapping
-    public SensorData saveSensorData(@RequestParam String type, @RequestParam double value) {
-        SensorData data = SensorData.builder()
-                .type(type)
-                .value(value)
-                .timestamp(LocalDateTime.now())
-                .build();
+    public SensorData saveSensorData(@RequestBody SensorDataRequest req) {
+        SensorData data = new SensorData();
+        data.setSensorType(req.getType());   // DTO의 type → 엔티티의 sensorType
+        data.setValue(req.getValue());
+        data.setUnit(req.getUnit());
+        data.setTimestamp(LocalDateTime.now());
+        data.setCreatedAt(LocalDateTime.now());
 
         return sensorDataRepository.save(data);
     }
 
+    // 센서 타입별 전체 데이터 조회
     @GetMapping("/temperature")
     public List<Map<String, Object>> getTemperatureData() {
         return getLatestPerMinuteData("temperature");
@@ -48,15 +53,14 @@ public class SensorDataController {
         return getLatestPerMinuteData("do");
     }
 
-    // ✅ 같은 시간(HH:mm)당 가장 마지막 값만 반환
-    private List<Map<String, Object>> getLatestPerMinuteData(String type) {
-        List<SensorData> dataList = sensorDataRepository.findByTypeOrderByTimestampAsc(type);
+    // 같은 분(HH:mm) 당 최신값 1개만 반환
+    private List<Map<String, Object>> getLatestPerMinuteData(String sensorType) {
+        List<SensorData> dataList = sensorDataRepository.findBySensorTypeOrderByTimestampAsc(sensorType);
 
-        // HH:mm 기준으로 최신값 1개만 추출
         Map<String, SensorData> latestPerMinute = new LinkedHashMap<>();
-
         for (SensorData data : dataList) {
-            String key = data.getTimestamp().toLocalTime().toString().substring(0, 5); // HH:mm
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            String key = data.getTimestamp().format(formatter);
             latestPerMinute.put(key, data); // 오름차순이므로 마지막 값이 최신
         }
 
@@ -71,9 +75,11 @@ public class SensorDataController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/latest/{type}")
-    public Map<String, Object> getLatestSensorData(@PathVariable String type) {
-        SensorData data = sensorDataRepository.findTopByTypeOrderByTimestampDesc(type);
+    // 최신 데이터 1개 조회
+    @GetMapping("/latest/{sensorType}")
+    public Map<String, Object> getLatestSensorData(@PathVariable String sensorType) {
+        // sensorType은 URL에서 들어온 값 (temperature, humidity, ph, do)
+        SensorData data = sensorDataRepository.findTopBySensorTypeOrderByTimestampDesc(sensorType);
 
         if (data == null) {
             return Map.of("value", 0, "unit", "", "timestamp", "");

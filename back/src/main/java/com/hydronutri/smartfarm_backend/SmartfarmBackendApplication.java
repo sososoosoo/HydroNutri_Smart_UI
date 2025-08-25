@@ -1,4 +1,4 @@
-Move-Item back/src/README.md back/README.mdpackage com.hydronutri.smartfarm_backend;
+package com.hydronutri.smartfarm_backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
