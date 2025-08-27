@@ -13,6 +13,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.hydronutri.smartfarm_backend.service.SensorEventService;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 @RestController
 @RequestMapping("/api/sensor")
 @CrossOrigin(origins = "*")
@@ -23,6 +27,9 @@ public class SensorDataController {
 
     @Autowired
     private MailService mailService;
+
+    @Autowired
+    private SensorEventService sensorEventService;
 
     // 임계치(원하면 나중에 properties로 뺄 수 있음)
     private static final double TEMP_HIGH = 30.0;   // °C 초과 경고
@@ -42,7 +49,9 @@ public class SensorDataController {
         data.setUnit(req.getUnit());
         data.setTimestamp(LocalDateTime.now());
         data.setCreatedAt(LocalDateTime.now());
-        return sensorDataRepository.save(data);
+        SensorData saved = sensorDataRepository.save(data);
+        sensorEventService.publish(java.util.List.of(saved));
+        return saved;
     }
 
     // === 히스토리(프론트 차트/표가 호출하는 경로) ===
@@ -144,6 +153,8 @@ public class SensorDataController {
             d.setCreatedAt(now);
             saved.add(sensorDataRepository.save(d));
         }
+        // 저장 직후, 프론트에 SSE 푸시
+        sensorEventService.publish(saved);
 
         List<String> breaches = new ArrayList<>();
         for (SensorData d : saved) {
@@ -184,5 +195,11 @@ public class SensorDataController {
                 "breachCount", breaches.size(),
                 "breaches", breaches
         );
+    }
+
+    // 브라우저가 구독하는 SSE 스트림
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream() {
+        return sensorEventService.subscribe();
     }
 }

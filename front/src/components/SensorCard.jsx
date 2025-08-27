@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE_URL } from '../config';
 
-const SensorCard = ({ type, label }) => {
+const SensorCard = ({ type, label, refreshKey = 0 }) => {
     const [value, setValue] = useState(null);
     const [unit, setUnit] = useState('');
     const [time, setTime] = useState('');
@@ -24,7 +24,7 @@ const SensorCard = ({ type, label }) => {
                 // 필요 시 임시 표시값
                 // setValue(0); setUnit('');
             });
-    }, [type]);
+    }, [type, refreshKey]);
 
     return (
         <div style={{

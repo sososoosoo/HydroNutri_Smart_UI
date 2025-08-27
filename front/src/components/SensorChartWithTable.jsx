@@ -15,7 +15,7 @@ import { API_BASE_URL } from '../config';
  *  - api  : 센서 키 (예: "temperature" | "humidity" | "ph" | "do")
  *  - unit : 단위 문자열
  */
-export default function SensorChartWithTable({ title = '센서', api = '', unit = '' }) {
+export default function SensorChartWithTable({ title = '센서', api = '', unit = '', refreshKey = 0 }) {
     const [raw, setRaw] = useState([]);    // 서버 원본 [{time, value}, ...] — 엑셀/차트는 이 전체를 사용
     const [loading, setLoading] = useState(true);
     const [errMsg, setErrMsg] = useState('');
@@ -48,7 +48,7 @@ export default function SensorChartWithTable({ title = '센서', api = '', unit 
             }
         })();
         return () => { cancel = true; };
-    }, [api]);
+    }, [api, refreshKey]);  // refreshKey 변경 시 재요청
 
     // ─────────────────────────────────────────────────────────────
     // 2) 파생 데이터
